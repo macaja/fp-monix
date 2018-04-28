@@ -1,15 +1,16 @@
 package fp.monix
 
-import org.scalatest.{AsyncWordSpec, Matchers}
-import monix.reactive.Observable
-
-import scala.concurrent.duration._
+import monix.eval.Task
 import monix.execution.Scheduler.Implicits.global
+import monix.reactive.{Consumer, Observable}
+import org.scalatest.{AsyncWordSpec, Matchers}
+
+import scala.io.Source
 
 class ObservableTest extends AsyncWordSpec with Matchers{
 
   "Monix Observable" should{
-    "" in{
+    /*"emit events with interval" in{
       val tick = {
         Observable.interval(1.second)
           // common filtering and mapping
@@ -24,7 +25,21 @@ class ObservableTest extends AsyncWordSpec with Matchers{
       }.subscribe()
       println(s"observable => $tick")
       1 should be(1)
-    }
+    }*/
+  }
+  "x" in{
+    val filename = "/home/mauricio/projects/mine/fp-monix/test.txt"
+    val file: Iterator[String] = Source.fromFile(filename).getLines
+    def x = Observable.fromIterator(file).map(l => {
+      val result = s"$l with observable"
+      /*println(l)
+      println(result)*/
+      result
+    }).consumeWith(consumer)
+
+    def consumer: Consumer[String, String] = Consumer.foldLeftTask("")((x,s) => Task.now(x + s))
+    println(s"${x.runAsync}")
+    1 should be(1)
   }
 
 }

@@ -4,7 +4,7 @@
 		module="fp-monix-build"
 		revision="0.1.0-SNAPSHOT"
 		status="integration"
-		publication="20180426223428"
+		publication="20180427155544"
 		e:sbtVersion="1.0" e:scalaVersion="2.12"
 	>
 		<description>

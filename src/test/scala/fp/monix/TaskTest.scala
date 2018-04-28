@@ -6,6 +6,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.{AsyncWordSpec, Matchers}
 
 import scala.concurrent.Future
+import scala.concurrent.duration._
 
 class TaskTest extends AsyncWordSpec with Matchers with ScalaFutures{
 
@@ -49,11 +50,50 @@ class TaskTest extends AsyncWordSpec with Matchers with ScalaFutures{
 
     "memoize result as Future does" in{
       val total = Task {
-        println("Computing 5 + 5)")
+        println("Computing 5 + 5")
         5 + 5
       }.memoize
       println(s"total 1 memoize ${total.runAsync}")
       println(s"total 2 memoize ${total.runAsync}")
+      1 should be(1)
+    }
+    "evalOnce" in{
+      val task = Task.evalOnce{
+        println("Computing evalOnce")
+        1 + 1
+      } //memoize on the fisrt evaluation
+      println(s"task 1 evalOnce ${task.runAsync}")
+      println(s"task 2 evalOnce ${task.runAsync}")
+      1 should be(1)
+    }
+
+    "delay" in{ //alias for eval
+      val delayTask = Task.delay{
+        println("Computing delay")
+        1 + 1
+      }
+      println(s"total 1 memoize ${delayTask.runAsync}")
+      println(s"total 2 memoize ${delayTask.runAsync}")
+      1 should be(1)
+    }
+
+    "delay execution" in{
+      val task = Task{
+        println("Computing delay execution")
+        1 + 1
+      }.delayExecution(10.seconds)
+      println(s"delay execution 1 ${task.runAsync}")
+      println(s"delay execution 2 ${task.runAsync}")
+      1 should be(1)
+    }
+
+    "delay result" in{
+      val task = Task{
+        println("Computing delay result")
+        1 + 1
+      }.delayResult(10.seconds)
+      println(s"delay result 1 ${task.runAsync}")
+      println(s"delay result 2 ${task.runAsync}")
       1 should be(1)
     }
 
@@ -73,6 +113,17 @@ class TaskTest extends AsyncWordSpec with Matchers with ScalaFutures{
       val taskDefer = Task.deferFuture(future) //don't execute the future until runAsync
       println(s"task => ${task}")
       println(s"task deferFuture => ${taskDefer}")
+      1 should be(1)
+    }
+
+    "error handling" in{
+      val task = Task.eval(1)
+      task onErrorRestart(3)
+      task onErrorRestartIf(_.equals(NullPointerException))
+      task onCancelRaiseError(new Exception(""))
+      task onErrorHandle(_ => 4)
+      task onErrorHandleWith{ case _ => Task.now(2)}
+
       1 should be(1)
     }
   }
