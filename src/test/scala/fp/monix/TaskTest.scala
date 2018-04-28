@@ -119,11 +119,15 @@ class TaskTest extends AsyncWordSpec with Matchers with ScalaFutures{
     "error handling" in{
       val task = Task.eval(1)
       task onErrorRestart(3)
-      task onErrorRestartIf(_.equals(NullPointerException))
       task onCancelRaiseError(new Exception(""))
       task onErrorHandle(_ => 4)
       task onErrorHandleWith{ case _ => Task.now(2)}
 
+      1 should be(1)
+    }
+    "race" in{
+      val race = Task.race(Task(1+1), Task(20+30))
+      println(s"race => ${race.runAsync}")
       1 should be(1)
     }
   }
